@@ -167,79 +167,186 @@ export default function ShopPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto px-4 py-6">
         <div className="flex gap-6">
-          <aside className="hidden lg:block w-64 space-y-6">
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4">Categories</h3>
-                <div className="space-y-2">
-                  <Button
-                    variant={filters.category === '' ? 'default' : 'ghost'}
-                    className="w-full justify-start"
-                    onClick={() => setFilters({ ...filters, category: '' })}
-                  >
-                    All Products
-                  </Button>
-                  {categories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant={filters.category === category.slug ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setFilters({ ...filters, category: category.slug })}
-                    >
-                      {category.name}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <aside className="hidden lg:block w-64">
+            <div className="bg-white shadow-sm">
+              <div className="border-b border-gray-200 p-4">
+                <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+              </div>
 
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4">Price Range</h3>
-                <div className="space-y-4">
-                  <Slider
-                    value={[filters.minPrice, filters.maxPrice]}
-                    min={0}
-                    max={10000}
-                    step={100}
-                    onValueChange={([min, max]) =>
-                      setFilters({ ...filters, minPrice: min, maxPrice: max })
-                    }
-                  />
-                  <div className="flex justify-between text-sm">
-                    <span>₹{filters.minPrice}</span>
-                    <span>₹{filters.maxPrice}</span>
+              <div className="border-b border-gray-200">
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Categories</h3>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setFilters({ ...filters, category: '', gender: '' })}
+                      className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                        filters.category === '' && filters.gender === ''
+                          ? 'bg-gray-900 text-white font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      All Products
+                    </button>
+
+                    <button
+                      onClick={() => setFilters({ ...filters, category: '', gender: 'men' })}
+                      className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                        filters.gender === 'men' && !filters.category
+                          ? 'bg-gray-900 text-white font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Men&apos;s Clothing
+                    </button>
+
+                    <button
+                      onClick={() => setFilters({ ...filters, category: '', gender: 'women' })}
+                      className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                        filters.gender === 'women' && !filters.category
+                          ? 'bg-gray-900 text-white font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Women&apos;s Clothing
+                    </button>
+
+                    {categories
+                      .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-'))
+                      .slice(0, 8)
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setFilters({ ...filters, category: category.slug, gender: '' })}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                            filters.category === category.slug
+                              ? 'bg-gray-900 text-white font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {category.name}
+                        </button>
+                      ))}
+
+                    {filters.gender === 'men' && categories
+                      .filter(c => c.slug.startsWith('mens-'))
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setFilters({ ...filters, category: category.slug })}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                            filters.category === category.slug
+                              ? 'bg-gray-900 text-white font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {category.name.replace("Men's ", '')}
+                        </button>
+                      ))}
+
+                    {filters.gender === 'women' && categories
+                      .filter(c => c.slug.startsWith('womens-'))
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setFilters({ ...filters, category: category.slug })}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                            filters.category === category.slug
+                              ? 'bg-gray-900 text-white font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {category.name.replace("Women's ", '')}
+                        </button>
+                      ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4">Sizes</h3>
-                <div className="space-y-2">
-                  {allSizes.map((size) => (
-                    <div key={size} className="flex items-center">
-                      <Checkbox
-                        id={`size-${size}`}
-                        checked={filters.sizes.includes(size)}
-                        onCheckedChange={(checked) => {
-                          setFilters({
-                            ...filters,
-                            sizes: checked
-                              ? [...filters.sizes, size]
-                              : filters.sizes.filter((s) => s !== size),
-                          });
-                        }}
-                      />
-                      <Label htmlFor={`size-${size}`} className="ml-2 cursor-pointer">
-                        {size}
-                      </Label>
+              <div className="border-b border-gray-200">
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Price</h3>
+                  <div className="space-y-4">
+                    <Slider
+                      value={[filters.minPrice, filters.maxPrice]}
+                      min={0}
+                      max={10000}
+                      step={100}
+                      onValueChange={([min, max]) =>
+                        setFilters({ ...filters, minPrice: min, maxPrice: max })
+                      }
+                      className="w-full"
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Min</span>
+                        <span className="text-sm font-medium text-gray-900">₹{filters.minPrice}</span>
+                      </div>
+                      <span className="text-gray-400">-</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Max</span>
+                        <span className="text-sm font-medium text-gray-900">₹{filters.maxPrice}</span>
+                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="border-b border-gray-200">
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Size</h3>
+                  <div className="space-y-2">
+                    {allSizes.map((size) => (
+                      <div key={size} className="flex items-center">
+                        <Checkbox
+                          id={`size-${size}`}
+                          checked={filters.sizes.includes(size)}
+                          onCheckedChange={(checked) => {
+                            setFilters({
+                              ...filters,
+                              sizes: checked
+                                ? [...filters.sizes, size]
+                                : filters.sizes.filter((s) => s !== size),
+                            });
+                          }}
+                          className="rounded-sm border-gray-300"
+                        />
+                        <Label htmlFor={`size-${size}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                          {size}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-200">
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Color</h3>
+                  <div className="space-y-2">
+                    {allColors.map((color) => (
+                      <div key={color} className="flex items-center">
+                        <Checkbox
+                          id={`color-${color}`}
+                          checked={filters.colors.includes(color)}
+                          onCheckedChange={(checked) => {
+                            setFilters({
+                              ...filters,
+                              colors: checked
+                                ? [...filters.colors, color]
+                                : filters.colors.filter((c) => c !== color),
+                            });
+                          }}
+                          className="rounded-sm border-gray-300"
+                        />
+                        <Label htmlFor={`color-${color}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                          {color}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </aside>
 
           <main className="flex-1">
@@ -252,24 +359,146 @@ export default function ShopPage() {
                       Filters
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left">
-                    <SheetHeader>
-                      <SheetTitle>Filters</SheetTitle>
+                  <SheetContent side="left" className="w-80 p-0">
+                    <SheetHeader className="border-b border-gray-200 p-4">
+                      <SheetTitle className="text-base font-semibold">Filters</SheetTitle>
                     </SheetHeader>
-                    <div className="mt-6 space-y-6">
-                      <div>
-                        <h3 className="font-semibold mb-3">Categories</h3>
-                        <div className="space-y-2">
-                          {categories.map((category) => (
-                            <Button
-                              key={category.id}
-                              variant={filters.category === category.slug ? 'default' : 'ghost'}
-                              className="w-full justify-start"
-                              onClick={() => setFilters({ ...filters, category: category.slug })}
+                    <div className="overflow-y-auto h-[calc(100vh-70px)]">
+                      <div className="border-b border-gray-200">
+                        <div className="p-4">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Categories</h3>
+                          <div className="space-y-1">
+                            <button
+                              onClick={() => setFilters({ ...filters, category: '', gender: '' })}
+                              className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                                filters.category === '' && filters.gender === ''
+                                  ? 'bg-gray-900 text-white font-medium'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
                             >
-                              {category.name}
-                            </Button>
-                          ))}
+                              All Products
+                            </button>
+                            <button
+                              onClick={() => setFilters({ ...filters, category: '', gender: 'men' })}
+                              className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                                filters.gender === 'men' && !filters.category
+                                  ? 'bg-gray-900 text-white font-medium'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              Men&apos;s Clothing
+                            </button>
+                            <button
+                              onClick={() => setFilters({ ...filters, category: '', gender: 'women' })}
+                              className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                                filters.gender === 'women' && !filters.category
+                                  ? 'bg-gray-900 text-white font-medium'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              Women&apos;s Clothing
+                            </button>
+                            {categories
+                              .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-'))
+                              .slice(0, 8)
+                              .map((category) => (
+                                <button
+                                  key={category.id}
+                                  onClick={() => setFilters({ ...filters, category: category.slug, gender: '' })}
+                                  className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                                    filters.category === category.slug
+                                      ? 'bg-gray-900 text-white font-medium'
+                                      : 'text-gray-700 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {category.name}
+                                </button>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-b border-gray-200">
+                        <div className="p-4">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Price</h3>
+                          <div className="space-y-4">
+                            <Slider
+                              value={[filters.minPrice, filters.maxPrice]}
+                              min={0}
+                              max={10000}
+                              step={100}
+                              onValueChange={([min, max]) =>
+                                setFilters({ ...filters, minPrice: min, maxPrice: max })
+                              }
+                            />
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-600">Min</span>
+                                <span className="text-sm font-medium text-gray-900">₹{filters.minPrice}</span>
+                              </div>
+                              <span className="text-gray-400">-</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-600">Max</span>
+                                <span className="text-sm font-medium text-gray-900">₹{filters.maxPrice}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-b border-gray-200">
+                        <div className="p-4">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Size</h3>
+                          <div className="space-y-2">
+                            {allSizes.map((size) => (
+                              <div key={size} className="flex items-center">
+                                <Checkbox
+                                  id={`mobile-size-${size}`}
+                                  checked={filters.sizes.includes(size)}
+                                  onCheckedChange={(checked) => {
+                                    setFilters({
+                                      ...filters,
+                                      sizes: checked
+                                        ? [...filters.sizes, size]
+                                        : filters.sizes.filter((s) => s !== size),
+                                    });
+                                  }}
+                                  className="rounded-sm border-gray-300"
+                                />
+                                <Label htmlFor={`mobile-size-${size}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                                  {size}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-b border-gray-200">
+                        <div className="p-4">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Color</h3>
+                          <div className="space-y-2">
+                            {allColors.map((color) => (
+                              <div key={color} className="flex items-center">
+                                <Checkbox
+                                  id={`mobile-color-${color}`}
+                                  checked={filters.colors.includes(color)}
+                                  onCheckedChange={(checked) => {
+                                    setFilters({
+                                      ...filters,
+                                      colors: checked
+                                        ? [...filters.colors, color]
+                                        : filters.colors.filter((c) => c !== color),
+                                    });
+                                  }}
+                                  className="rounded-sm border-gray-300"
+                                />
+                                <Label htmlFor={`mobile-color-${color}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                                  {color}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
