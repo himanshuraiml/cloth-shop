@@ -94,7 +94,7 @@ npm run build
 
 ### Start Dev Server
 ```bash
-npm run dev
+npm run devn
 ```
 
 ---
