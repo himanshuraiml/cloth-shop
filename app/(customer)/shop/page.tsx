@@ -53,6 +53,8 @@ export default function ShopPage() {
 
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
+    gender: searchParams.get('gender') || '',
+    filter: searchParams.get('filter') || '',
     search: '',
     minPrice: 0,
     maxPrice: 10000,
@@ -62,9 +64,27 @@ export default function ShopPage() {
   });
 
   useEffect(() => {
+    const categoryParam = searchParams.get('category') || '';
+    const genderParam = searchParams.get('gender') || '';
+    const filterParam = searchParams.get('filter') || '';
+
+    setFilters(prev => ({
+      ...prev,
+      category: categoryParam,
+      gender: genderParam,
+      filter: filterParam,
+    }));
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchCategories();
-    fetchProducts();
-  }, [filters]);
+  }, []);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      fetchProducts();
+    }
+  }, [filters, categories]);
 
   const fetchCategories = async () => {
     const { data } = await supabase
@@ -78,13 +98,37 @@ export default function ShopPage() {
     setLoading(true);
     let query = supabase
       .from('products')
-      .select('*')
+      .select('*, categories(name, slug)')
       .eq('is_active', true);
 
     if (filters.category) {
       const category = categories.find(c => c.slug === filters.category);
       if (category) {
         query = query.eq('category_id', category.id);
+      }
+    }
+
+    if (filters.gender) {
+      const genderCategories = categories
+        .filter(c => c.slug.startsWith(filters.gender === 'men' ? 'mens-' : 'womens-'))
+        .map(c => c.id);
+
+      if (genderCategories.length > 0) {
+        query = query.in('category_id', genderCategories);
+      }
+    }
+
+    if (filters.filter) {
+      switch (filters.filter) {
+        case 'new':
+          query = query.gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+          break;
+        case 'bestsellers':
+          query = query.order('stock_quantity', { ascending: false });
+          break;
+        case 'sale':
+          query = query.not('discount_price', 'is', null);
+          break;
       }
     }
 
@@ -96,17 +140,19 @@ export default function ShopPage() {
       .gte('price', filters.minPrice)
       .lte('price', filters.maxPrice);
 
-    switch (filters.sortBy) {
-      case 'price-low':
-        query = query.order('price', { ascending: true });
-        break;
-      case 'price-high':
-        query = query.order('price', { ascending: false });
-        break;
-      case 'newest':
-      default:
-        query = query.order('created_at', { ascending: false });
-        break;
+    if (!filters.filter || filters.filter !== 'bestsellers') {
+      switch (filters.sortBy) {
+        case 'price-low':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-high':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'newest':
+        default:
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
     }
 
     const { data } = await query;
