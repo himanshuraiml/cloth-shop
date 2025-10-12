@@ -109,12 +109,29 @@ export default function ShopPage() {
     }
 
     if (filters.gender) {
-      const genderCategories = categories
-        .filter(c => c.slug.startsWith(filters.gender === 'men' ? 'mens-' : 'womens-'))
-        .map(c => c.id);
+      let genderPrefix = '';
+      if (filters.gender === 'men') {
+        genderPrefix = 'mens-';
+      } else if (filters.gender === 'women') {
+        genderPrefix = 'womens-';
+      } else if (filters.gender === 'kids') {
+        const genderCategories = categories
+          .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
+          .map(c => c.id);
 
-      if (genderCategories.length > 0) {
-        query = query.in('category_id', genderCategories);
+        if (genderCategories.length > 0) {
+          query = query.in('category_id', genderCategories);
+        }
+      }
+
+      if (genderPrefix) {
+        const genderCategories = categories
+          .filter(c => c.slug.startsWith(genderPrefix))
+          .map(c => c.id);
+
+        if (genderCategories.length > 0) {
+          query = query.in('category_id', genderCategories);
+        }
       }
     }
 
@@ -210,6 +227,17 @@ export default function ShopPage() {
                       Women&apos;s Clothing
                     </button>
 
+                    <button
+                      onClick={() => setFilters({ ...filters, category: '', gender: 'kids' })}
+                      className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                        filters.gender === 'kids' && !filters.category
+                          ? 'bg-gray-900 text-white font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Baby &amp; Kids
+                    </button>
+
                     {categories
                       .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-'))
                       .slice(0, 8)
@@ -256,6 +284,22 @@ export default function ShopPage() {
                           }`}
                         >
                           {category.name.replace("Women's ", '')}
+                        </button>
+                      ))}
+
+                    {filters.gender === 'kids' && categories
+                      .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
+                      .map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setFilters({ ...filters, category: category.slug })}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                            filters.category === category.slug
+                              ? 'bg-gray-900 text-white font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {category.name.replace('Baby ', '').replace('Kids ', '')}
                         </button>
                       ))}
                   </div>
@@ -398,8 +442,18 @@ export default function ShopPage() {
                             >
                               Women&apos;s Clothing
                             </button>
+                            <button
+                              onClick={() => setFilters({ ...filters, category: '', gender: 'kids' })}
+                              className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                                filters.gender === 'kids' && !filters.category
+                                  ? 'bg-gray-900 text-white font-medium'
+                                  : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              Baby &amp; Kids
+                            </button>
                             {categories
-                              .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-'))
+                              .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-') && !c.slug.startsWith('baby-') && !c.slug.startsWith('kids-'))
                               .slice(0, 8)
                               .map((category) => (
                                 <button
