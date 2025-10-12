@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { MobileNav } from './MobileNav';
 import { SearchModal } from './SearchModal';
-import { CategoryDropdown } from './CategoryDropdown';
+import { ShopMegaMenu } from './ShopMegaMenu';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { cn } from '@/lib/utils';
@@ -99,17 +99,11 @@ export function CustomerHeader() {
             <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList className="gap-1">
                 <NavigationMenuItem>
-                  <Link href="/" legacyBehavior passHref>
-                    <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
-                      Home
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Shop</NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="text-sm font-medium">
+                    Shop
+                  </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <CategoryDropdown />
+                    <ShopMegaMenu />
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
@@ -130,52 +124,82 @@ export function CustomerHeader() {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Men</NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="text-sm font-medium">
+                    Men
+                  </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-48 p-4">
-                      <div className="space-y-2">
-                        <Link href="/shop?category=mens-shirts" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                    <div className="w-64 p-6 bg-white">
+                      <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span className="text-xl">👔</span>
+                        Men's Collection
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Link href="/shop?category=mens-shirts" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
                           Shirts
                         </Link>
-                        <Link href="/shop?category=mens-tshirts" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=mens-tshirts" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
                           T-Shirts
                         </Link>
-                        <Link href="/shop?category=mens-jeans" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=mens-jeans" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
                           Jeans
                         </Link>
-                        <Link href="/shop?category=mens-shoes" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=mens-trousers" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
+                          Trousers
+                        </Link>
+                        <Link href="/shop?category=mens-jackets" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
+                          Jackets
+                        </Link>
+                        <Link href="/shop?category=mens-shoes" className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors">
                           Shoes
                         </Link>
                       </div>
+                      <Link href="/shop?gender=men" className="block mt-4 pt-4 border-t border-gray-200 text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                        View All Men's Products →
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>Women</NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="text-sm font-medium">
+                    Women
+                  </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-48 p-4">
-                      <div className="space-y-2">
-                        <Link href="/shop?category=womens-dresses" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                    <div className="w-64 p-6 bg-white">
+                      <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span className="text-xl">👗</span>
+                        Women's Collection
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Link href="/shop?category=womens-dresses" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
                           Dresses
                         </Link>
-                        <Link href="/shop?category=womens-tops" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=womens-tops" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
                           Tops
                         </Link>
-                        <Link href="/shop?category=womens-jeans" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=womens-jeans" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
                           Jeans
                         </Link>
-                        <Link href="/shop?category=womens-shoes" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md">
+                        <Link href="/shop?category=womens-skirts" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
+                          Skirts
+                        </Link>
+                        <Link href="/shop?category=womens-jackets" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
+                          Jackets
+                        </Link>
+                        <Link href="/shop?category=womens-shoes" className="block px-3 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-md transition-colors">
                           Shoes
                         </Link>
                       </div>
+                      <Link href="/shop?gender=women" className="block mt-4 pt-4 border-t border-gray-200 text-sm text-pink-600 hover:text-pink-700 font-semibold">
+                        View All Women's Products →
+                      </Link>
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
                   <Link href="/shop?filter=sale" legacyBehavior passHref>
-                    <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 text-red-600 hover:text-red-700 focus:bg-gray-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+                    <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-red-50 text-red-600 hover:text-red-700 focus:bg-red-50 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
                       Sale
                     </NavigationMenuLink>
                   </Link>
