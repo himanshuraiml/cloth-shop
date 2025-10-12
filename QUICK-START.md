@@ -1,171 +1,143 @@
-# 🚀 Quick Start Guide
+# Quick Start Guide - Login Instructions
 
-## Step 1: Create Admin Account
+## ✅ Authentication is NOW Working!
 
-### Visit Setup Page
-```
-http://localhost:3000/setup
-```
-
-Click "Create Admin User" with default credentials:
-- Email: `admin@tribaah.com`
-- Password: `Admin@123`
+The login issue has been fixed. You can now login with existing user accounts.
 
 ---
 
-## Step 2: Login
+## 🔑 Existing User Accounts
 
-### Visit Login Page
-```
-http://localhost:3000/login
-```
+Your database already has 5 users. Here are the accounts:
 
-Enter the credentials you just created.
+### Admin Account
+- **Email**: `admin@tribaah.com`
+- **Password**: Use the password you set when creating this admin
+- **Dashboard**: `/admin`
 
----
+### Seller Accounts
+1. **Email**: `himanshurairai560@gmail.com`
+   - **Role**: Seller
+   - **Dashboard**: `/seller`
 
-## Step 3: Access Different Dashboards
+2. **Email**: `seller@test.com`
+   - **Role**: Seller
+   - **Password**: `test123456` (if created with test script)
+   - **Dashboard**: `/seller`
 
-### Admin Panel
-After login as admin, you'll be at:
-```
-http://localhost:3000/admin
-```
+### Customer Accounts
+1. **Email**: `jyotiverma1492@gmail.com`
+   - **Role**: Customer
+   - **Redirects to**: `/shop`
 
-### Seller Dashboard
-For seller accounts:
-```
-http://localhost:3000/seller
-```
-
-### Customer Shop
-For customers:
-```
-http://localhost:3000/shop
-```
-
-### Customer Profile
-```
-http://localhost:3000/profile
-```
-
-### Customer Orders
-```
-http://localhost:3000/orders
-```
+2. **Email**: `rechardsonrone@gmail.com`
+   - **Role**: Customer
+   - **Redirects to**: `/shop`
 
 ---
 
-## User Roles & Access
+## 🚀 How to Login
 
-| Role | Access Pages | Redirect After Login |
-|------|--------------|---------------------|
-| **Admin** | `/admin/*` | `/admin` |
-| **Seller** | `/seller/*` | `/seller` |
-| **Customer** | `/shop`, `/profile`, `/orders`, `/cart`, `/checkout` | `/shop` |
+1. **Navigate to**: `http://localhost:3000/login`
 
----
+2. **Enter your credentials**:
+   - Email address
+   - Password
 
-## Protected Routes
+3. **Click "Sign in"**
 
-The following routes require authentication:
-- `/admin/*` - Admin only
-- `/seller/*` - Seller only
-- `/profile/*` - Any authenticated user
-- `/checkout/*` - Any authenticated user
-- `/orders/*` - Any authenticated user
-
-If not authenticated, you'll be redirected to `/login` with a callback URL.
+4. **You'll be automatically redirected** based on your role:
+   - **Admin** → `/admin` (Admin Dashboard)
+   - **Seller** → `/seller` (Seller Dashboard)
+   - **Customer** → `/shop` (Shop Page)
 
 ---
 
-## Quick Commands
+## 🔧 What Was Fixed
 
-### Create Admin (using script)
-```bash
-node scripts/create-admin.js
+### Issues Resolved:
+1. ✅ **Missing NextAuth API Route** - Created `/api/auth/[...nextauth]/route.ts`
+2. ✅ **Auth Configuration** - Added debug logging and better error handling
+3. ✅ **Database Schema** - Fixed `categories.image` → `categories.image_url`
+4. ✅ **Error Redirect** - Errors now redirect to `/login` instead of error page
+5. ✅ **Role-based Redirect** - Automatic redirect after successful login
+
+---
+
+## 🎯 Testing Login
+
+### Test with Admin Account:
 ```
-Then copy the SQL output to Supabase SQL Editor.
+Go to: http://localhost:3000/login
 
-### Build Project
-```bash
-npm run build
+Email: admin@tribaah.com
+Password: [your admin password]
+
+Should redirect to: /admin
 ```
 
-### Start Dev Server
-```bash
-npm run devn
+### Test with Seller Account:
+```
+Go to: http://localhost:3000/login
+
+Email: seller@test.com
+Password: test123456
+
+Should redirect to: /seller
 ```
 
 ---
 
-## Testing Flow
+## 🆕 Create New Test Accounts
 
-1. ✅ Visit `/setup` and create admin
-2. ✅ Login at `/login` with admin credentials
-3. ✅ Verify redirect to `/shop` (default for all users)
-4. ✅ Manually navigate to `/admin` (only works for admin role)
-5. ✅ Try `/seller` (should show unauthorized for admin)
-6. ✅ Visit `/profile` to edit profile
-7. ✅ Visit `/orders` to see order history
-8. ✅ Logout and try accessing protected pages
+If you need to create more test accounts:
 
----
-
-## Troubleshooting
-
-### 404 Error After Login
-✅ **Fixed!** The login now redirects to `/shop` by default.
-
-### Cannot Access Admin Panel
-- Verify user role in database: `SELECT email, role FROM users;`
-- Admin role must be exactly `'admin'`
-- Navigate directly to: `http://localhost:3000/admin`
-
-### Unauthorized Page
-- Check you're logged in with the correct role
-- Admin users → `/admin`
-- Seller users → `/seller`
-- Customers → `/shop`, `/profile`, `/orders`
+### Use Registration Page
+1. Go to `/register`
+2. Fill in the form
+3. Select role (customer, seller)
+4. Create account
 
 ---
 
-## Database Check
+## 🔍 Troubleshooting
 
-### Verify User Exists
-```sql
-SELECT id, email, full_name, role, created_at
-FROM users
-WHERE email = 'admin@tribaah.com';
+### "Invalid email or password"
+- Verify the email exists in database
+- Check password is correct
+- Try creating new test account
+
+### Login button does nothing
+- Open browser console (F12) for errors
+- Verify NextAuth route exists
+- Check .env variables
+- Restart dev server
+
+### Redirects to error page
+- Now fixed! Errors redirect to /login
+- Check server console logs
+- Verify database connection
+
+---
+
+## 📞 Server Logs
+
+When you attempt login, check your terminal for logs like:
+```
+[Auth] Attempting login for: user@example.com
+[Auth] User found, verifying password...
+[Auth] Login successful: user@example.com Role: customer
 ```
 
-### Check All Users
-```sql
-SELECT email, role, created_at FROM users;
+If login fails, you'll see:
 ```
-
-### Update User Role
-```sql
-UPDATE users
-SET role = 'admin'
-WHERE email = 'your@email.com';
+[Auth] User not found: user@example.com
+```
+or
+```
+[Auth] Invalid password for: user@example.com
 ```
 
 ---
 
-## Next Steps
-
-1. ✅ Create admin account via `/setup`
-2. ✅ Login and verify access
-3. ✅ Create some test products (in admin panel)
-4. ✅ Create seller account (via SQL or register page with role='seller')
-5. ✅ Create customer account (via `/register`)
-6. ✅ Test the complete shopping flow
-
----
-
-## Support
-
-For detailed setup instructions, see: **ADMIN-SETUP.md**
-
-For database schema, see: **database-schema.sql**
+**Authentication is fully functional! You can now login and test all features.** 🚀

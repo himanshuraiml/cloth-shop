@@ -9,7 +9,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  image?: string;
+  image_url?: string;
   parent_id?: string;
 }
 
@@ -59,7 +59,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
       setLoadingCategories(true);
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name, slug, description, image, parent_id')
+        .select('id, name, slug, description, image_url, parent_id')
         .order('name');
 
       if (error) throw error;

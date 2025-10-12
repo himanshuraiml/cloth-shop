@@ -17,32 +17,51 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error('[Auth] Missing credentials');
+            return null;
+          }
+
+          console.log('[Auth] Attempting login for:', credentials.email);
+
+          const { data: user, error } = await supabase
+            .from('users')
+            .select('id, email, password_hash, role, full_name')
+            .eq('email', credentials.email)
+            .maybeSingle();
+
+          if (error) {
+            console.error('[Auth] Database error:', error);
+            return null;
+          }
+
+          if (!user) {
+            console.error('[Auth] User not found:', credentials.email);
+            return null;
+          }
+
+          console.log('[Auth] User found, verifying password...');
+
+          const isPasswordValid = await compare(credentials.password, user.password_hash);
+
+          if (!isPasswordValid) {
+            console.error('[Auth] Invalid password for:', credentials.email);
+            return null;
+          }
+
+          console.log('[Auth] Login successful:', user.email, 'Role:', user.role);
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.full_name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('[Auth] Authorization error:', error);
+          return null;
         }
-
-        const { data: user, error } = await supabase
-          .from('users')
-          .select('id, email, password_hash, role, full_name')
-          .eq('email', credentials.email)
-          .maybeSingle();
-
-        if (error || !user) {
-          throw new Error('Invalid email or password');
-        }
-
-        const isPasswordValid = await compare(credentials.password, user.password_hash);
-
-        if (!isPasswordValid) {
-          throw new Error('Invalid email or password');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.full_name,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -69,10 +88,12 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
