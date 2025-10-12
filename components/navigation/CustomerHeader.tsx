@@ -21,8 +21,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Phone,
-  Mail,
   Search,
   ShoppingBag,
   Heart,
@@ -81,43 +79,6 @@ export function CustomerHeader() {
         "sticky top-0 z-50 w-full bg-white transition-shadow duration-300",
         isScrolled ? "shadow-md" : "shadow-sm"
       )}>
-        <div className="hidden lg:block bg-gray-100 border-b border-gray-200">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-10 text-sm">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Phone className="h-4 w-4" />
-                  <span>+91 1234567890</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Mail className="h-4 w-4" />
-                  <span>support@tribaah.com</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Link href="/track-order" className="text-gray-600 hover:text-gray-900 transition-colors">
-                  Track Order
-                </Link>
-                {session?.user ? (
-                  <span className="text-gray-600 font-medium">
-                    Hi, {session.user.name ? session.user.name.split(' ')[0] : 'User'}
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
-                      Login
-                    </Link>
-                    <span className="text-gray-400">/</span>
-                    <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
-                      Register
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-6">
