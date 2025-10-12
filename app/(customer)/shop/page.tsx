@@ -63,6 +63,16 @@ export default function ShopPage() {
     sortBy: 'newest',
   });
 
+  const [expandedCategories, setExpandedCategories] = useState<{
+    men: boolean;
+    women: boolean;
+    kids: boolean;
+  }>({
+    men: false,
+    women: false,
+    kids: false,
+  });
+
   useEffect(() => {
     const categoryParam = searchParams.get('category') || '';
     const genderParam = searchParams.get('gender') || '';
@@ -207,110 +217,102 @@ export default function ShopPage() {
 
                     <div>
                       <button
-                        onClick={() => setFilters({ ...filters, category: '', gender: 'men' })}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                          filters.gender === 'men' && !filters.category
+                        onClick={() => setExpandedCategories({ ...expandedCategories, men: !expandedCategories.men })}
+                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                          filters.gender === 'men'
                             ? 'bg-gray-900 text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        Men&apos;s Clothing
+                        <span>Men&apos;s Clothing</span>
+                        <span className="text-xs">{expandedCategories.men ? '−' : '+'}</span>
                       </button>
-                      <div className="ml-4 mt-1 space-y-1">
-                        {categories
-                          .filter(c => c.slug.startsWith('mens-'))
-                          .map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => setFilters({ ...filters, category: category.slug, gender: 'men' })}
-                              className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                filters.category === category.slug
-                                  ? 'bg-gray-900 text-white font-medium'
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                              }`}
-                            >
-                              {category.name.replace("Men's ", '')}
-                            </button>
-                          ))}
-                      </div>
+                      {expandedCategories.men && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {categories
+                            .filter(c => c.slug.startsWith('mens-'))
+                            .map((category) => (
+                              <button
+                                key={category.id}
+                                onClick={() => setFilters({ ...filters, category: category.slug, gender: 'men' })}
+                                className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                  filters.category === category.slug
+                                    ? 'bg-gray-900 text-white font-medium'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                              >
+                                {category.name.replace("Men's ", '')}
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </div>
 
                     <div>
                       <button
-                        onClick={() => setFilters({ ...filters, category: '', gender: 'women' })}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                          filters.gender === 'women' && !filters.category
+                        onClick={() => setExpandedCategories({ ...expandedCategories, women: !expandedCategories.women })}
+                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                          filters.gender === 'women'
                             ? 'bg-gray-900 text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        Women&apos;s Clothing
+                        <span>Women&apos;s Clothing</span>
+                        <span className="text-xs">{expandedCategories.women ? '−' : '+'}</span>
                       </button>
-                      <div className="ml-4 mt-1 space-y-1">
-                        {categories
-                          .filter(c => c.slug.startsWith('womens-'))
-                          .map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => setFilters({ ...filters, category: category.slug, gender: 'women' })}
-                              className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                filters.category === category.slug
-                                  ? 'bg-gray-900 text-white font-medium'
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                              }`}
-                            >
-                              {category.name.replace("Women's ", '')}
-                            </button>
-                          ))}
-                      </div>
+                      {expandedCategories.women && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {categories
+                            .filter(c => c.slug.startsWith('womens-'))
+                            .map((category) => (
+                              <button
+                                key={category.id}
+                                onClick={() => setFilters({ ...filters, category: category.slug, gender: 'women' })}
+                                className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                  filters.category === category.slug
+                                    ? 'bg-gray-900 text-white font-medium'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                              >
+                                {category.name.replace("Women's ", '')}
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </div>
 
                     <div>
                       <button
-                        onClick={() => setFilters({ ...filters, category: '', gender: 'kids' })}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                          filters.gender === 'kids' && !filters.category
+                        onClick={() => setExpandedCategories({ ...expandedCategories, kids: !expandedCategories.kids })}
+                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                          filters.gender === 'kids'
                             ? 'bg-gray-900 text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        Baby &amp; Kids
+                        <span>Baby &amp; Kids</span>
+                        <span className="text-xs">{expandedCategories.kids ? '−' : '+'}</span>
                       </button>
-                      <div className="ml-4 mt-1 space-y-1">
-                        {categories
-                          .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
-                          .map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => setFilters({ ...filters, category: category.slug, gender: 'kids' })}
-                              className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                filters.category === category.slug
-                                  ? 'bg-gray-900 text-white font-medium'
-                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                              }`}
-                            >
-                              {category.name.replace('Baby ', '').replace('Kids ', '')}
-                            </button>
-                          ))}
-                      </div>
+                      {expandedCategories.kids && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {categories
+                            .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
+                            .map((category) => (
+                              <button
+                                key={category.id}
+                                onClick={() => setFilters({ ...filters, category: category.slug, gender: 'kids' })}
+                                className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                  filters.category === category.slug
+                                    ? 'bg-gray-900 text-white font-medium'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                              >
+                                {category.name.replace('Baby ', '').replace('Kids ', '')}
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </div>
-
-                    {categories
-                      .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-') && !c.slug.startsWith('baby-') && !c.slug.startsWith('kids-'))
-                      .slice(0, 8)
-                      .map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() => setFilters({ ...filters, category: category.slug, gender: '' })}
-                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                            filters.category === category.slug
-                              ? 'bg-gray-900 text-white font-medium'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          {category.name}
-                        </button>
-                      ))}
                   </div>
                 </div>
               </div>
@@ -434,110 +436,102 @@ export default function ShopPage() {
 
                             <div>
                               <button
-                                onClick={() => setFilters({ ...filters, category: '', gender: 'men' })}
-                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                                  filters.gender === 'men' && !filters.category
+                                onClick={() => setExpandedCategories({ ...expandedCategories, men: !expandedCategories.men })}
+                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                                  filters.gender === 'men'
                                     ? 'bg-gray-900 text-white font-medium'
                                     : 'text-gray-700 hover:bg-gray-50'
                                 }`}
                               >
-                                Men&apos;s Clothing
+                                <span>Men&apos;s Clothing</span>
+                                <span className="text-xs">{expandedCategories.men ? '−' : '+'}</span>
                               </button>
-                              <div className="ml-4 mt-1 space-y-1">
-                                {categories
-                                  .filter(c => c.slug.startsWith('mens-'))
-                                  .map((category) => (
-                                    <button
-                                      key={category.id}
-                                      onClick={() => setFilters({ ...filters, category: category.slug, gender: 'men' })}
-                                      className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                        filters.category === category.slug
-                                          ? 'bg-gray-900 text-white font-medium'
-                                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                      }`}
-                                    >
-                                      {category.name.replace("Men's ", '')}
-                                    </button>
-                                  ))}
-                              </div>
+                              {expandedCategories.men && (
+                                <div className="ml-4 mt-1 space-y-1">
+                                  {categories
+                                    .filter(c => c.slug.startsWith('mens-'))
+                                    .map((category) => (
+                                      <button
+                                        key={category.id}
+                                        onClick={() => setFilters({ ...filters, category: category.slug, gender: 'men' })}
+                                        className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                          filters.category === category.slug
+                                            ? 'bg-gray-900 text-white font-medium'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                      >
+                                        {category.name.replace("Men's ", '')}
+                                      </button>
+                                    ))}
+                                </div>
+                              )}
                             </div>
 
                             <div>
                               <button
-                                onClick={() => setFilters({ ...filters, category: '', gender: 'women' })}
-                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                                  filters.gender === 'women' && !filters.category
+                                onClick={() => setExpandedCategories({ ...expandedCategories, women: !expandedCategories.women })}
+                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                                  filters.gender === 'women'
                                     ? 'bg-gray-900 text-white font-medium'
                                     : 'text-gray-700 hover:bg-gray-50'
                                 }`}
                               >
-                                Women&apos;s Clothing
+                                <span>Women&apos;s Clothing</span>
+                                <span className="text-xs">{expandedCategories.women ? '−' : '+'}</span>
                               </button>
-                              <div className="ml-4 mt-1 space-y-1">
-                                {categories
-                                  .filter(c => c.slug.startsWith('womens-'))
-                                  .map((category) => (
-                                    <button
-                                      key={category.id}
-                                      onClick={() => setFilters({ ...filters, category: category.slug, gender: 'women' })}
-                                      className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                        filters.category === category.slug
-                                          ? 'bg-gray-900 text-white font-medium'
-                                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                      }`}
-                                    >
-                                      {category.name.replace("Women's ", '')}
-                                    </button>
-                                  ))}
-                              </div>
+                              {expandedCategories.women && (
+                                <div className="ml-4 mt-1 space-y-1">
+                                  {categories
+                                    .filter(c => c.slug.startsWith('womens-'))
+                                    .map((category) => (
+                                      <button
+                                        key={category.id}
+                                        onClick={() => setFilters({ ...filters, category: category.slug, gender: 'women' })}
+                                        className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                          filters.category === category.slug
+                                            ? 'bg-gray-900 text-white font-medium'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                      >
+                                        {category.name.replace("Women's ", '')}
+                                      </button>
+                                    ))}
+                                </div>
+                              )}
                             </div>
 
                             <div>
                               <button
-                                onClick={() => setFilters({ ...filters, category: '', gender: 'kids' })}
-                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                                  filters.gender === 'kids' && !filters.category
+                                onClick={() => setExpandedCategories({ ...expandedCategories, kids: !expandedCategories.kids })}
+                                className={`w-full text-left px-3 py-2 text-sm rounded transition-colors flex items-center justify-between ${
+                                  filters.gender === 'kids'
                                     ? 'bg-gray-900 text-white font-medium'
                                     : 'text-gray-700 hover:bg-gray-50'
                                 }`}
                               >
-                                Baby &amp; Kids
+                                <span>Baby &amp; Kids</span>
+                                <span className="text-xs">{expandedCategories.kids ? '−' : '+'}</span>
                               </button>
-                              <div className="ml-4 mt-1 space-y-1">
-                                {categories
-                                  .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
-                                  .map((category) => (
-                                    <button
-                                      key={category.id}
-                                      onClick={() => setFilters({ ...filters, category: category.slug, gender: 'kids' })}
-                                      className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
-                                        filters.category === category.slug
-                                          ? 'bg-gray-900 text-white font-medium'
-                                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                      }`}
-                                    >
-                                      {category.name.replace('Baby ', '').replace('Kids ', '')}
-                                    </button>
-                                  ))}
-                              </div>
+                              {expandedCategories.kids && (
+                                <div className="ml-4 mt-1 space-y-1">
+                                  {categories
+                                    .filter(c => c.slug.startsWith('baby-') || c.slug.startsWith('kids-'))
+                                    .map((category) => (
+                                      <button
+                                        key={category.id}
+                                        onClick={() => setFilters({ ...filters, category: category.slug, gender: 'kids' })}
+                                        className={`w-full text-left px-3 py-1.5 text-sm rounded transition-colors ${
+                                          filters.category === category.slug
+                                            ? 'bg-gray-900 text-white font-medium'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                      >
+                                        {category.name.replace('Baby ', '').replace('Kids ', '')}
+                                      </button>
+                                    ))}
+                                </div>
+                              )}
                             </div>
-
-                            {categories
-                              .filter(c => !c.slug.startsWith('mens-') && !c.slug.startsWith('womens-') && !c.slug.startsWith('baby-') && !c.slug.startsWith('kids-'))
-                              .slice(0, 8)
-                              .map((category) => (
-                                <button
-                                  key={category.id}
-                                  onClick={() => setFilters({ ...filters, category: category.slug, gender: '' })}
-                                  className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                                    filters.category === category.slug
-                                      ? 'bg-gray-900 text-white font-medium'
-                                      : 'text-gray-700 hover:bg-gray-50'
-                                  }`}
-                                >
-                                  {category.name}
-                                </button>
-                              ))}
                           </div>
                         </div>
                       </div>
