@@ -6,8 +6,11 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'E-Commerce Platform',
-  description: 'Multi-vendor clothing e-commerce platform',
+  title: 'Tribaah - Fashion & Clothing Store',
+  description: 'Shop the latest trends in fashion for men, women, and kids at Tribaah - Your destination for quality clothing',
+  icons: {
+    icon: '/Trendy Minimalist Logo for Tribaah Clothing Store.png',
+  },
 };
 
 export default function RootLayout({
