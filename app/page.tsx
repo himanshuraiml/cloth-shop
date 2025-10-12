@@ -270,6 +270,57 @@ export default async function HomePage() {
           </section>
         )}
 
+        {/* New Arrivals */}
+        {newArrivals.length > 0 && (
+          <section>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">New Arrivals</h2>
+                <p className="text-gray-600 mt-1">Fresh styles just landed</p>
+              </div>
+              <Link href="/shop?filter=new">
+                <Button variant="ghost" className="hidden md:flex">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {newArrivals.slice(0, 6).map((product: any) => (
+                <Link key={product.id} href={`/product/${product.slug}`}>
+                  <Card className="group hover:shadow-lg transition-all cursor-pointer border hover:border-gray-300">
+                    <CardContent className="p-3">
+                      <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                        {product.images && product.images[0] ? (
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-12 h-12 text-gray-300" />
+                          </div>
+                        )}
+                        <Badge className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold">
+                          NEW
+                        </Badge>
+                      </div>
+                      <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-lg font-bold text-coral-600">
+                        ₹{(product.discount_price || product.price).toLocaleString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* All Products Section */}
         {allProducts.length > 0 && (
           <section>
@@ -356,57 +407,6 @@ export default async function HomePage() {
                   </Link>
                 );
               })}
-            </div>
-          </section>
-        )}
-
-        {/* New Arrivals */}
-        {newArrivals.length > 0 && (
-          <section>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">New Arrivals</h2>
-                <p className="text-gray-600 mt-1">Fresh styles just landed</p>
-              </div>
-              <Link href="/shop?filter=new">
-                <Button variant="ghost" className="hidden md:flex">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {newArrivals.slice(0, 6).map((product: any) => (
-                <Link key={product.id} href={`/product/${product.slug}`}>
-                  <Card className="group hover:shadow-lg transition-all cursor-pointer border hover:border-gray-300">
-                    <CardContent className="p-3">
-                      <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
-                        {product.images && product.images[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-12 h-12 text-gray-300" />
-                          </div>
-                        )}
-                        <Badge className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold">
-                          NEW
-                        </Badge>
-                      </div>
-                      <h3 className="font-medium text-sm text-gray-900 line-clamp-2 mb-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-lg font-bold text-coral-600">
-                        ₹{(product.discount_price || product.price).toLocaleString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
             </div>
           </section>
         )}

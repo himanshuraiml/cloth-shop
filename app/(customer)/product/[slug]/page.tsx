@@ -244,7 +244,13 @@ export default function ProductDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <label className="block font-semibold mb-3">Select Size</label>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block font-semibold">Select Size</label>
+                  <Link href="/size-guide" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Size Guide
+                  </Link>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {product.sizes.map((size) => (
                     <Button
