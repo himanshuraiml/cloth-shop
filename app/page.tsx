@@ -15,32 +15,80 @@ const CustomerFooter = dynamic(() => import('@/components/navigation/CustomerFoo
 });
 
 async function getFeaturedProducts() {
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .not('discount_price', 'is', null)
-    .limit(8);
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .not('discount_price', 'is', null)
+      .limit(8);
+
+    if (error) {
+      console.error('[Home] Error fetching featured products:', error);
+      return [];
+    }
+
+    return (data || []).map(product => ({
+      ...product,
+      images: product.images || [],
+      sizes: product.sizes || [],
+      colors: product.colors || [],
+    }));
+  } catch (error) {
+    console.error('[Home] Exception fetching featured products:', error);
+    return [];
+  }
 }
 
 async function getNewArrivals() {
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(6);
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error('[Home] Error fetching new arrivals:', error);
+      return [];
+    }
+
+    return (data || []).map(product => ({
+      ...product,
+      images: product.images || [],
+      sizes: product.sizes || [],
+      colors: product.colors || [],
+    }));
+  } catch (error) {
+    console.error('[Home] Exception fetching new arrivals:', error);
+    return [];
+  }
 }
 
 async function getAllProducts() {
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[Home] Error fetching all products:', error);
+      return [];
+    }
+
+    return (data || []).map(product => ({
+      ...product,
+      images: product.images || [],
+      sizes: product.sizes || [],
+      colors: product.colors || [],
+    }));
+  } catch (error) {
+    console.error('[Home] Exception fetching all products:', error);
+    return [];
+  }
 }
 
 export default async function HomePage() {
