@@ -38,34 +38,61 @@ export default function LoginPage() {
     try {
       const callbackUrl = searchParams.get('callbackUrl');
 
+      console.log('[Login] Attempting sign in for:', formData.email);
+
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
       });
 
+      console.log('[Login] Sign in result:', result);
+
       if (result?.error) {
-        setError(result.error);
+        console.error('[Login] Sign in error:', result.error);
+        setError('Invalid email or password. Please try again.');
         setIsLoading(false);
         return;
       }
 
       if (result?.ok) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log('[Login] Sign in successful, fetching session...');
 
-        const sessionRes = await fetch('/api/auth/session');
-        const session = await sessionRes.json();
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        if (callbackUrl) {
-          window.location.href = callbackUrl;
-        } else if (session?.user?.role) {
-          window.location.href = getRoleRedirectPath(session.user.role);
-        } else {
-          window.location.href = '/shop';
+        try {
+          const sessionRes = await fetch('/api/auth/session');
+
+          if (!sessionRes.ok) {
+            console.error('[Login] Failed to fetch session:', sessionRes.status);
+            setError('Failed to establish session. Please try again.');
+            setIsLoading(false);
+            return;
+          }
+
+          const session = await sessionRes.json();
+          console.log('[Login] Session fetched:', session);
+
+          if (!session?.user) {
+            console.error('[Login] No user in session');
+            setError('Session creation failed. Please try again.');
+            setIsLoading(false);
+            return;
+          }
+
+          const redirectPath = callbackUrl || getRoleRedirectPath(session.user.role);
+          console.log('[Login] Redirecting to:', redirectPath);
+
+          window.location.href = redirectPath;
+        } catch (fetchError) {
+          console.error('[Login] Error fetching session:', fetchError);
+          setError('Failed to verify session. Please try again.');
+          setIsLoading(false);
         }
       }
     } catch (err: any) {
-      setError('An error occurred during login');
+      console.error('[Login] Unexpected error:', err);
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
   };

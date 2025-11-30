@@ -6,6 +6,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const authOptions: NextAuthOptions = {
@@ -70,19 +74,29 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        console.log('[JWT Callback] Token created with role:', user.role);
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session?.user && token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        console.log('[Session Callback] Session created for:', session.user.email, 'with role:', session.user.role);
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith('/')) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
+      console.log('[Redirect Callback] URL:', url, 'BaseURL:', baseUrl);
+
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+
       return baseUrl;
     },
   },

@@ -6,32 +6,28 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    if (path.startsWith('/admin') && token?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
+    console.log('[Middleware] Path:', path, 'Token role:', token?.role);
+
+    if (!token) {
+      console.log('[Middleware] No token found for protected route:', path);
+      return NextResponse.next();
     }
 
-    if (path.startsWith('/seller') && token?.role !== 'seller') {
-      return NextResponse.redirect(new URL('/unauthorized', req.url));
+    if (path.startsWith('/admin')) {
+      if (token.role !== 'admin') {
+        console.log('[Middleware] Unauthorized admin access attempt by role:', token.role);
+        return NextResponse.redirect(new URL('/unauthorized', req.url));
+      }
     }
 
-    if (path.startsWith('/profile') && !token) {
-      const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('callbackUrl', path);
-      return NextResponse.redirect(loginUrl);
+    if (path.startsWith('/seller')) {
+      if (token.role !== 'seller') {
+        console.log('[Middleware] Unauthorized seller access attempt by role:', token.role);
+        return NextResponse.redirect(new URL('/unauthorized', req.url));
+      }
     }
 
-    if (path.startsWith('/checkout') && !token) {
-      const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('callbackUrl', path);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (path.startsWith('/orders') && !token) {
-      const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('callbackUrl', path);
-      return NextResponse.redirect(loginUrl);
-    }
-
+    console.log('[Middleware] Access granted for:', path);
     return NextResponse.next();
   },
   {
@@ -40,15 +36,21 @@ export default withAuth(
         const path = req.nextUrl.pathname;
 
         if (path.startsWith('/admin')) {
-          return token?.role === 'admin';
+          const isAuthorized = token?.role === 'admin';
+          console.log('[Middleware Auth] Admin check:', isAuthorized);
+          return isAuthorized;
         }
 
         if (path.startsWith('/seller')) {
-          return token?.role === 'seller';
+          const isAuthorized = token?.role === 'seller';
+          console.log('[Middleware Auth] Seller check:', isAuthorized);
+          return isAuthorized;
         }
 
         if (path.startsWith('/profile') || path.startsWith('/checkout') || path.startsWith('/orders')) {
-          return !!token;
+          const isAuthorized = !!token;
+          console.log('[Middleware Auth] Protected route check:', isAuthorized);
+          return isAuthorized;
         }
 
         return true;
