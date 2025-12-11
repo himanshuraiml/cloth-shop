@@ -4,12 +4,19 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -41,8 +48,11 @@ export const authOptions: NextAuthOptions = {
 
           console.log('[Auth] Auth successful, fetching user data...');
 
-          // Fetch user data from public.users table
-          const { data: user, error: userError } = await supabase
+          // Sign out from Supabase Auth since we're using NextAuth for session management
+          await supabase.auth.signOut();
+
+          // Fetch user data from public.users table using service role (bypasses RLS)
+          const { data: user, error: userError } = await supabaseAdmin
             .from('users')
             .select('id, email, role, full_name')
             .eq('id', authData.user.id)
@@ -54,9 +64,6 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[Auth] Login successful:', user.email, 'Role:', user.role);
-
-          // Sign out from Supabase since we're using NextAuth for session management
-          await supabase.auth.signOut();
 
           return {
             id: user.id,
