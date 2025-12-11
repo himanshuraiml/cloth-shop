@@ -1,6 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcryptjs';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -29,32 +28,35 @@ export const authOptions: NextAuthOptions = {
 
           console.log('[Auth] Attempting login for:', credentials.email);
 
-          const { data: user, error } = await supabase
+          // Use Supabase Auth to verify credentials
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          });
+
+          if (authError || !authData.user) {
+            console.error('[Auth] Authentication failed:', authError?.message);
+            return null;
+          }
+
+          console.log('[Auth] Auth successful, fetching user data...');
+
+          // Fetch user data from public.users table
+          const { data: user, error: userError } = await supabase
             .from('users')
-            .select('id, email, password_hash, role, full_name')
-            .eq('email', credentials.email)
+            .select('id, email, role, full_name')
+            .eq('id', authData.user.id)
             .maybeSingle();
 
-          if (error) {
-            console.error('[Auth] Database error:', error);
-            return null;
-          }
-
-          if (!user) {
-            console.error('[Auth] User not found:', credentials.email);
-            return null;
-          }
-
-          console.log('[Auth] User found, verifying password...');
-
-          const isPasswordValid = await compare(credentials.password, user.password_hash);
-
-          if (!isPasswordValid) {
-            console.error('[Auth] Invalid password for:', credentials.email);
+          if (userError || !user) {
+            console.error('[Auth] Failed to fetch user data:', userError);
             return null;
           }
 
           console.log('[Auth] Login successful:', user.email, 'Role:', user.role);
+
+          // Sign out from Supabase since we're using NextAuth for session management
+          await supabase.auth.signOut();
 
           return {
             id: user.id,

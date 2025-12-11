@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
-import { hash } from 'bcryptjs';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 export async function POST(request: Request) {
   try {
@@ -29,45 +33,54 @@ export async function POST(request: Request) {
     const validRoles = ['customer', 'seller', 'admin'];
     const userRole = role && validRoles.includes(role) ? role : 'customer';
 
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 400 }
-      );
-    }
-
-    const hashedPassword = await hash(password, 12);
-
-    const { data: newUser, error: userError } = await supabase
-      .from('users')
-      .insert({
-        email,
-        password_hash: hashedPassword,
+    // Use Supabase Auth to create the user
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
         full_name,
-        role: userRole,
         phone: phone || null,
-      })
-      .select('id, email, full_name, role')
-      .single();
+        role: userRole,
+      }
+    });
 
-    if (userError) {
-      console.error('User creation error:', userError);
+    if (authError) {
+      console.error('Auth error:', authError);
+
+      // Handle specific error cases
+      if (authError.message.includes('already registered')) {
+        return NextResponse.json(
+          { error: 'User with this email already exists' },
+          { status: 400 }
+        );
+      }
+
+      if (authError.message.includes('password')) {
+        return NextResponse.json(
+          { error: authError.message },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
         { error: 'Failed to create user account' },
         { status: 500 }
       );
     }
 
-    const { error: profileError } = await supabase
+    if (!authData.user) {
+      return NextResponse.json(
+        { error: 'Failed to create user account' },
+        { status: 500 }
+      );
+    }
+
+    // Create profile for the user
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
-        user_id: newUser.id,
+        user_id: authData.user.id,
       });
 
     if (profileError) {
@@ -78,10 +91,10 @@ export async function POST(request: Request) {
       {
         message: 'User registered successfully',
         user: {
-          id: newUser.id,
-          email: newUser.email,
-          full_name: newUser.full_name,
-          role: newUser.role,
+          id: authData.user.id,
+          email: authData.user.email,
+          full_name,
+          role: userRole,
         },
       },
       { status: 201 }
