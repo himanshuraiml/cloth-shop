@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/useUser';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Menu, ExternalLink, LogOut, User as UserIcon, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -66,8 +67,16 @@ function getBreadcrumbItems(pathname: string) {
 
 export function TopBar({ onMenuClick }: TopBarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { user } = useUser();
   const breadcrumbItems = getBreadcrumbItems(pathname);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
@@ -116,20 +125,20 @@ export function TopBar({ onMenuClick }: TopBarProps) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" />
                   <AvatarFallback className="bg-coral-500 text-white text-sm">
-                    {session?.user?.name?.[0]?.toUpperCase() || 'A'}
+                    {user?.name?.[0]?.toUpperCase() || 'A'}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden lg:inline text-sm font-medium">
-                  {session?.user?.name || 'Admin'}
+                  {user?.name || 'Admin'}
                 </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div>
-                  <p className="font-medium">{session?.user?.name || 'Admin User'}</p>
+                  <p className="font-medium">{user?.name || 'Admin User'}</p>
                   <p className="text-xs text-gray-500 font-normal">
-                    {session?.user?.email || 'admin@tribaah.com'}
+                    {user?.email || 'admin@tribaah.com'}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -155,7 +164,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={handleSignOut}
                 className="cursor-pointer text-red-600"
               >
                 <LogOut className="h-4 w-4 mr-2" />

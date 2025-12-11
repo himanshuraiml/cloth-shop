@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/useUser';
+import { createClient } from '@/lib/supabase/client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -32,11 +34,20 @@ interface Category {
 }
 
 export function MobileNav() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useUser();
+  const router = useRouter();
   const { getCartCount } = useCart();
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+    setOpen(false);
+  };
 
   useEffect(() => {
     if (open) {
@@ -76,10 +87,10 @@ export function MobileNav() {
         </SheetHeader>
 
         <div className="mt-6 space-y-1">
-          {session ? (
+          {isAuthenticated && user ? (
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">Welcome back,</p>
-              <p className="font-semibold text-gray-900">{session.user?.name}</p>
+              <p className="font-semibold text-gray-900">{user.name}</p>
             </div>
           ) : (
             <div className="mb-4 space-y-2">
@@ -162,7 +173,7 @@ export function MobileNav() {
             </Button>
           </Link>
 
-          {session && (
+          {isAuthenticated && (
             <>
               <Separator className="my-4" />
 
@@ -206,10 +217,7 @@ export function MobileNav() {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-red-600"
-                onClick={() => {
-                  signOut({ callbackUrl: '/login' });
-                  handleLinkClick();
-                }}
+                onClick={handleSignOut}
               >
                 <LogOut className="mr-3 h-5 w-5" />
                 Logout

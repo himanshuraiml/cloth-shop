@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -54,20 +54,24 @@ interface Order {
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading } = useUser();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login');
       return;
     }
 
-    fetchOrder();
-  }, [session, params.id]);
+    if (isAuthenticated && user) {
+      fetchOrder();
+    }
+  }, [isAuthenticated, isLoading, user, params.id]);
 
   const fetchOrder = async () => {
+    if (!user?.id) return;
+
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -88,7 +92,7 @@ export default function OrderDetailPage() {
           )
         `)
         .eq('id', params.id)
-        .eq('user_id', session?.user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (error) throw error;

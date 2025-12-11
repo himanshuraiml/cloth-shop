@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/useUser';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -107,9 +108,17 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { user } = useUser();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  };
 
   useEffect(() => {
     const savedState = localStorage.getItem('seller-sidebar-collapsed');
@@ -286,21 +295,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="" />
                   <AvatarFallback className="bg-coral-500 text-white">
-                    {session?.user?.name?.[0]?.toUpperCase() || 'S'}
+                    {user?.name?.[0]?.toUpperCase() || 'S'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
-                    {session?.user?.name || 'Seller User'}
+                    {user?.name || 'Seller User'}
                   </p>
                   <p className="text-xs text-beige-200 truncate">
-                    {session?.user?.email || 'seller@tribaah.com'}
+                    {user?.email || 'seller@tribaah.com'}
                   </p>
                 </div>
               </div>
               <Button
                 variant="ghost"
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={handleSignOut}
                 className="w-full justify-start gap-3 text-beige-100 hover:text-white hover:bg-beige-700"
               >
                 <LogOut className="h-4 w-4" />
@@ -311,7 +320,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={handleSignOut}
               className="w-full text-beige-100 hover:text-white hover:bg-beige-700"
             >
               <LogOut className="h-5 w-5" />

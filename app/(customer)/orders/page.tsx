@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,18 +78,18 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
 };
 
 export default function OrdersPage() {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading: authLoading } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!authLoading && !isAuthenticated) {
       router.push('/login?callbackUrl=/orders');
-    } else if (status === 'authenticated') {
+    } else if (isAuthenticated) {
       fetchOrders();
     }
-  }, [status, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const fetchOrders = async () => {
     try {

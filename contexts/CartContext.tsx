@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { supabase } from '@/lib/supabase';
 
 export interface CartItem {
@@ -35,19 +35,21 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useUser();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       loadCartFromDB();
     } else {
       loadCartFromLocalStorage();
     }
-  }, [session]);
+  }, [isAuthenticated, user?.id]);
 
   const loadCartFromDB = async () => {
+    if (!user?.id) return;
+
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -68,7 +70,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             stock_quantity
           )
         `)
-        .eq('user_id', session?.user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -108,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToCart = async (productId: string, quantity: number, size?: string, color?: string) => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const existingItem = cart.find(
           item => item.product_id === productId && item.size === size && item.color === color
@@ -126,7 +128,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const { data, error } = await supabase
             .from('cart')
             .insert({
-              user_id: session.user.id,
+              user_id: user.id,
               product_id: productId,
               quantity,
               size,
@@ -199,7 +201,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const { error } = await supabase
           .from('cart')
@@ -225,7 +227,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromCart = async (cartItemId: string) => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const { error } = await supabase
           .from('cart')
@@ -247,12 +249,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearCart = async () => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const { error } = await supabase
           .from('cart')
           .delete()
-          .eq('user_id', session.user.id);
+          .eq('user_id', user.id);
 
         if (error) throw error;
 

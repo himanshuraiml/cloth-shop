@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { supabase } from '@/lib/supabase';
 
 export interface WishlistItem {
@@ -30,19 +30,21 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useUser();
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       loadWishlistFromDB();
     } else {
       loadWishlistFromLocalStorage();
     }
-  }, [session]);
+  }, [isAuthenticated, user?.id]);
 
   const loadWishlistFromDB = async () => {
+    if (!user?.id) return;
+
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -60,7 +62,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
             stock_quantity
           )
         `)
-        .eq('user_id', session?.user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -100,7 +102,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToWishlist = async (productId: string) => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const existingItem = wishlist.find(item => item.product_id === productId);
         if (existingItem) return;
@@ -114,7 +116,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         const { data, error } = await supabase
           .from('wishlist')
           .insert({
-            user_id: session.user.id,
+            user_id: user.id,
             product_id: productId
           })
           .select('id, product_id')
@@ -159,12 +161,12 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromWishlist = async (productId: string) => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       try {
         const { error } = await supabase
           .from('wishlist')
           .delete()
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .eq('product_id', productId);
 
         if (error) throw error;

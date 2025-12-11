@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ShoppingCart,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
-  const { data: session } = useSession();
+  const { user } = useUser();
 
   const stats = [
     {
@@ -64,9 +64,9 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        {session?.user && (
+        {user && (
           <p className="text-gray-600 mt-1">
-            Welcome back, {session.user.name}!
+            Welcome back, {user.name}!
           </p>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { supabase } from '@/lib/supabase';
 
 export interface Category {
@@ -24,7 +24,7 @@ interface NavigationContextType {
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
+  const { user, isAuthenticated, role } = useUser();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -34,14 +34,14 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (isAuthenticated && user?.id) {
       loadNotificationCount();
       const interval = setInterval(loadNotificationCount, 60000);
       return () => clearInterval(interval);
     } else {
       setNotificationCount(0);
     }
-  }, [session]);
+  }, [isAuthenticated, user?.id, role]);
 
   const loadCategories = async () => {
     try {
@@ -75,10 +75,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   };
 
   const loadNotificationCount = async () => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
     try {
-      const role = session.user.role;
       let count = 0;
 
       if (role === 'admin') {
@@ -92,7 +91,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
         const { count: sellerCount, error } = await supabase
           .from('seller_notifications')
           .select('*', { count: 'exact', head: true })
-          .eq('seller_id', session.user.id)
+          .eq('seller_id', user.id)
           .eq('is_read', false);
 
         if (!error) count = sellerCount || 0;

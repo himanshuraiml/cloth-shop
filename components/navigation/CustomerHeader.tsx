@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/useUser';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
@@ -16,7 +18,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -27,23 +28,19 @@ import {
   User,
   ChevronDown,
   Package,
-  MapPin,
-  Settings,
   LogOut,
-  Store,
   Gift,
   Award,
-  CreditCard
 } from 'lucide-react';
 import { MobileNav } from './MobileNav';
 import { SearchModal } from './SearchModal';
-import { ShopMegaMenu } from './ShopMegaMenu';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { cn } from '@/lib/utils';
 
 export function CustomerHeader() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useUser();
+  const router = useRouter();
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -69,6 +66,13 @@ export function CustomerHeader() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  };
 
   const cartCount = getCartCount();
   const wishlistCount = getWishlistCount();
@@ -392,7 +396,7 @@ export function CustomerHeader() {
                 </Button>
               </Link>
 
-              {session?.user ? (
+              {isAuthenticated && user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="hidden lg:flex gap-1 font-semibold hover:bg-blue-50">
@@ -409,10 +413,10 @@ export function CustomerHeader() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-900 truncate">
-                            {session.user.name || 'User'}
+                            {user.name || 'User'}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {session.user.email}
+                            {user.email}
                           </p>
                         </div>
                       </div>
@@ -459,7 +463,7 @@ export function CustomerHeader() {
                     <div className="py-2">
                       <DropdownMenuItem
                         className="cursor-pointer px-4 py-2.5 flex items-center gap-3 text-red-600 hover:bg-red-50"
-                        onClick={() => signOut({ callbackUrl: '/' })}
+                        onClick={handleSignOut}
                       >
                         <LogOut className="h-5 w-5" />
                         <span className="font-medium">Logout</span>

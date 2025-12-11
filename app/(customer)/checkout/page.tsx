@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
+import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading: userLoading } = useUser();
   const router = useRouter();
   const { cart, loading: cartLoading, getCartTotal, getCartCount, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
@@ -31,27 +31,29 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (!session && !cartLoading) {
+    if (!userLoading && !isAuthenticated) {
       router.push('/login?callbackUrl=/checkout');
       return;
     }
 
-    if (session) {
+    if (isAuthenticated && user) {
       loadUserProfile();
     }
-  }, [session, cartLoading]);
+  }, [isAuthenticated, userLoading, user]);
 
   const loadUserProfile = async () => {
+    if (!user?.id) return;
+
     try {
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', session?.user?.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       if (profile) {
         setShippingAddress({
-          fullName: session?.user?.name || '',
+          fullName: user.name || '',
           phone: '',
           address: profile.address || '',
           city: profile.city || '',
@@ -61,7 +63,7 @@ export default function CheckoutPage() {
       } else {
         setShippingAddress(prev => ({
           ...prev,
-          fullName: session?.user?.name || ''
+          fullName: user.name || ''
         }));
       }
     } catch (error) {
@@ -78,7 +80,7 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      if (!session?.user?.id) {
+      if (!user?.id) {
         toast.error('Please login to place an order');
         router.push('/login?redirect=/checkout');
         return;
@@ -94,7 +96,7 @@ export default function CheckoutPage() {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: session.user.id,
+          user_id: user.id,
           order_number: orderNumber,
           total_amount: total,
           payment_status: paymentMethod === 'cod' ? 'pending' : 'pending',
@@ -135,7 +137,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (cartLoading) {
+  if (cartLoading || userLoading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <p className="text-gray-600">Loading...</p>
@@ -291,7 +293,7 @@ export default function CheckoutPage() {
                         {item.color && <p className="text-xs text-gray-600">Color: {item.color}</p>}
                       </div>
                       <div className="text-sm font-medium">
-                        ₹{((item.product.discount_price || item.product.price) * item.quantity).toFixed(2)}
+                        INR {((item.product.discount_price || item.product.price) * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   ))}
@@ -300,16 +302,16 @@ export default function CheckoutPage() {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal ({getCartCount()} items)</span>
-                    <span>₹{subtotal.toFixed(2)}</span>
+                    <span>INR {subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
-                    <span>₹{shipping.toFixed(2)}</span>
+                    <span>INR {shipping.toFixed(2)}</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>₹{total.toFixed(2)}</span>
+                      <span>INR {total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading: authLoading } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,12 +58,12 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!authLoading && !isAuthenticated) {
       router.push('/login?callbackUrl=/profile');
-    } else if (status === 'authenticated') {
+    } else if (isAuthenticated) {
       fetchProfile();
     }
-  }, [status, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const fetchProfile = async () => {
     try {

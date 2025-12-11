@@ -20,7 +20,6 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useSession } from 'next-auth/react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -44,7 +43,6 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);

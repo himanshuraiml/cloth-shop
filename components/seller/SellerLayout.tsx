@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
@@ -12,20 +12,20 @@ interface SellerLayoutProps {
 }
 
 export function SellerLayout({ children }: SellerLayoutProps) {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading, isSeller, isAdmin } = useUser();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login?callbackUrl=/seller');
     }
 
-    if (status === 'authenticated' && session?.user?.role !== 'seller') {
+    if (!isLoading && isAuthenticated && !isSeller && !isAdmin) {
       router.push('/unauthorized');
     }
-  }, [status, session, router]);
+  }, [isLoading, isAuthenticated, isSeller, isAdmin, router]);
 
   useEffect(() => {
     const savedState = localStorage.getItem('seller-sidebar-collapsed');
@@ -34,7 +34,7 @@ export function SellerLayout({ children }: SellerLayoutProps) {
     }
   }, []);
 
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-beige-50">
         <div className="text-center">
@@ -45,7 +45,7 @@ export function SellerLayout({ children }: SellerLayoutProps) {
     );
   }
 
-  if (status === 'authenticated' && session?.user?.role !== 'seller') {
+  if (isAuthenticated && !isSeller && !isAdmin) {
     return null;
   }
 

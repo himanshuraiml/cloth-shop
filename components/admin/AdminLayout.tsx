@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
@@ -12,20 +12,20 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading, isAdmin } = useUser();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login?callbackUrl=/admin');
     }
 
-    if (status === 'authenticated' && session?.user?.role !== 'admin') {
+    if (!isLoading && isAuthenticated && !isAdmin) {
       router.push('/unauthorized');
     }
-  }, [status, session, router]);
+  }, [isLoading, isAuthenticated, isAdmin, router]);
 
   useEffect(() => {
     const savedState = localStorage.getItem('admin-sidebar-collapsed');
@@ -34,7 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, []);
 
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -45,7 +45,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  if (status === 'authenticated' && session?.user?.role !== 'admin') {
+  if (isAuthenticated && !isAdmin) {
     return null;
   }
 
